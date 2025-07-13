@@ -1,0 +1,1 @@
+ # response = send_request(f"delete_from_cart|{product_id}|{quantity}")
