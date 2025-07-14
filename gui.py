@@ -3,14 +3,20 @@ from tkinter import messagebox
 import ttkbootstrap as ttk
 import  matplotlib.pyplot as plt 
 from matplotlib.figure import Figure
+import socket
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg)
+# import the send request function 
 
 
-from client import send_request
 
-products_list=[]
-stock_list=[]
-
+ # Helper function to send requests to the server
+def send_request(request):
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect(("127.0.0.1", 5000))
+    client_socket.send(request.encode())
+    response = client_socket.recv(4096).decode()
+    client_socket.close()
+    return response
 
 # view product function for getting the products from the sever 
 def view_products():
@@ -19,8 +25,6 @@ def view_products():
     for line in response.split("\n"):
         if line.strip():
             product_id, name, price, stock = line.split("|")
-            products_list.append(name)
-            stock_list.append(stock)
             products_table.insert(parent="", index=tk.END, values=(product_id,name,price,stock ))
 
 # view_cart function for retrieving cart items from the server 
@@ -38,7 +42,6 @@ def add_to_cart():
     product_id = id_var.get()
     quantity = quantity_var.get()
     response = send_request(f"add_to_cart|{product_id}|{quantity}")
-    
     view_cart()
     print(response)
 #    pop up window for insufficient stock 
@@ -79,24 +82,27 @@ def checkout():
                 name, quantity, total = line.split("|")
                 print(f"{name} - Quantity: {quantity}, Total: ${total}")
                 checkout_table.insert(parent="",index=tk.END, values=(name,quantity,total))
+    # button for closing the pop up window 
     close_button=ttk.Button(popUP, text="Close", style="danger" ,command=popUP.destroy )
     close_button.pack(pady=20)
+    
+    # dictory for keeping the transaction history values 
 transaction_record={
     "productName":[],
     "quantity":[],
     "total":[]
 }
 
-
+# for transactions hictory
 def check_transactions():
     response = send_request("view_transactions")
-   
+#    pop up window to display the transaction history
     transaction_history_popUp=ttk.Toplevel(master=window)
     transaction_history_popUp.geometry("1200x1000+410+10")
-   
     
     label=ttk.Label(transaction_history_popUp, text="Transaction History", style="info", font=("Arial",20,"bold"))
     label.pack(pady=20)
+    # table for displaying the transactions history items 
     transaction_history=ttk.Treeview(transaction_history_popUp,columns=("first", "second","third","fourth","fifth"),show="headings", style="info")
     transaction_history.pack(padx=20, pady=10)
     transaction_history.heading("first",text="ID")
@@ -104,13 +110,14 @@ def check_transactions():
     transaction_history.heading("third", text="Quantity")
     transaction_history.heading("fourth", text="Price")
     transaction_history.heading("fifth",text="Total")
+    # inserting the values into the table 
     for line in response.split("\n"):
         if line.strip():
             product_id, name, quantity, price, total = line.split("|")
             transaction_history.insert(parent="",index=tk.END, values=(product_id,name,quantity,price,total))
             transaction_record["productName"].append(name)
             transaction_record["quantity"].append(float(quantity))
-    
+    # inserting the values into the dictionary 
     for item in  set(transaction_record["productName"]):
         count=0
         for i in range(len(transaction_record["productName"])):
@@ -122,7 +129,7 @@ def check_transactions():
     
     total_quantity=transaction_record["total"]
    
-    
+    # plotting a graph for the quantity and productName from the transaction history 
     fig=Figure(figsize=(8,4), dpi=80)
     plot=fig.add_subplot(111)
     plot.bar( list(product_names), total_quantity, color="skyblue")
@@ -134,11 +141,11 @@ def check_transactions():
     canvas.get_tk_widget().pack()
     
 
-            
+ #  close button to close the transactions history pop up window
     close_button=ttk.Button(transaction_history_popUp, text="Close", style="danger", command=transaction_history_popUp.destroy)
     close_button.pack(anchor="center", pady=20)
     
-    # transaction_history_popUp.mainloop()
+    
     
     
 #  creating the main window of the application 
@@ -159,35 +166,34 @@ file_menu.add_command(label="View Cart", command=lambda: print("New File"))
 file_menu.add_command(label="Checkout ", command=lambda: print("Open File"))
 file_menu.add_separator()
 file_menu.add_command(label="Exit", command=window.quit)
+
 # creating a dashboard with the main functions for the user 
 dashboard_frame=ttk.Frame(window)
 dashboard_frame.pack()
 button_width=18
-button_styles={
-    "width":18,
-    
-}
+
 # dashboard buttons with functions for the user to interact with 
 # viewButton for display the products from the inventory 
-viewButton=ttk.Button(dashboard_frame, width=button_styles["width"],text="View Products",style="info-outline", command=view_products)
+viewButton=ttk.Button(dashboard_frame, width=button_width,text="View Products",style="info-outline", command=view_products)
 viewButton.grid(column=0, row=0, pady=20)
 
 # checkout_Button calls the checkout function 
-Checkout_Button=ttk.Button(dashboard_frame,width=button_styles["width"],style="success-outline" ,text="Checkout", command=checkout)
+Checkout_Button=ttk.Button(dashboard_frame,width=button_width,style="success-outline" ,text="Checkout", command=checkout)
 Checkout_Button.grid(column=1, row=0, padx=10)
  
 
 #  view_Cart_Button calls the view_cart function to display cart items 
-transaction_history_Button=ttk.Button(dashboard_frame, width=button_styles["width"], style="warning-outline" ,text="Transaction History", command=check_transactions)
+transaction_history_Button=ttk.Button(dashboard_frame, width=button_width, style="warning-outline" ,text="Transaction History", command=check_transactions)
 transaction_history_Button.grid(column=2, row=0, padx=10)
 
 # Exit_Button closes the window
-Exit_Button=ttk.Button(dashboard_frame, width=button_styles["width"], style="dangerous-outline" , text="Exit", command=window.destroy)
+Exit_Button=ttk.Button(dashboard_frame, width=button_width, style="dangerous-outline" , text="Exit", command=window.destroy)
 Exit_Button.grid(column=3, row=0, padx=10)
 
 # products_table for displaying the products from the inventory
 products_table=ttk.Treeview(window,show="headings",style="primary",columns=("first", "second", "third","fourth"))
 products_table.pack(pady=20, expand=True)
+
 # columns for the table 
 products_table.heading("first", text="Product ID")
 products_table.heading("second", text="Product Name")
@@ -200,6 +206,7 @@ def product_selection():
         id=products_table.item(item)["values"]
         print(id[0])
         id_var.set(int(id[0]))
+        
 # binding the product_selection to an event named TreeviewSelection
 products_table.bind("<<TreeviewSelect>>", lambda event:product_selection())
 
@@ -234,6 +241,7 @@ add_to_Cart_Button.grid(column=0, row=1, padx=10)
 # cart_table for displaying cart items 
 cart_table=ttk.Treeview(window, style="secondary",show="headings", columns=("first","second","third","fourth","fifth"))
 cart_table.pack( expand=True)
+
 # cart_table table columns 
 cart_table.heading("first",text="ID")
 cart_table.heading("second",text="Product Name")
@@ -241,6 +249,7 @@ cart_table.heading("third", text="Quantity")
 cart_table.heading("fourth", text="Price")
 cart_table.heading("fifth",text="Total")
 
+# creating a function to delete items from the cart
 def delete_items(_):
     for i in cart_table.selection():
         # print(cart_table.item(i)["values"][0]) 
@@ -249,7 +258,7 @@ def delete_items(_):
         cart_table.delete(i)
         response = send_request(f"delete_from_cart|{product_id}|{quantity}")
         print("Delete request sent ")
-
+# binding the delete function to the delete button
 cart_table.bind("<Delete>",delete_items)
 
 
