@@ -242,12 +242,12 @@ cart_table.heading("fifth",text="Total")
 
 def delete_items(_):
     for i in cart_table.selection():
-        print(cart_table.item(i)["values"][0]) 
+        # print(cart_table.item(i)["values"][0]) 
         product_id=cart_table.item(i)["values"][0]
         quantity=cart_table.item(i)["values"][2]
         cart_table.delete(i)
         response = send_request(f"delete_from_cart|{product_id}|{quantity}")
-
+        print("Delete request sent ")
 
 cart_table.bind("<Delete>",delete_items)
 

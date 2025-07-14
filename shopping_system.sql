@@ -12,7 +12,8 @@
     FOREIGN KEY (productID) REFERENCES Products(productID)
  );
  CREATE TABLE IF NOT EXISTS Transactions (
-   productID INTEGER PRIMARY KEY,
+   transactionID INTEGER PRIMARY KEY AUTOINCREMENT,
+   productID INTEGER ,
    productName TEXT NOT NULL,
    price REAL NOT NULL,
    quantity INTEGER NOT NULL,
