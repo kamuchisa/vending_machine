@@ -100,10 +100,12 @@ def handle_client(client_socket):
                 client_socket.send(response.encode())
                 print("transactions sent")
             elif command == "delete_from_cart":
-                product_id, quantity = map(int, args)
-                cursor.execute("DELETE FROM Cart WHERE productID = ?", (product_id,))
-                conn.commit()
-                # client_socket.send("Item deleted from cart".encode())
+               product_id = int(args[0])  # Assuming args[0] is the productID
+               print("Deleting item", product_id)
+               cursor.execute("DELETE FROM Cart WHERE cartID = ?", (product_id,))
+               conn.commit()
+               client_socket.send("Item deleted from cart".encode())
+
             elif command == "exit":
                 client_socket.send("Goodbye!".encode())
                 break
