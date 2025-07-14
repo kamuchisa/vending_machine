@@ -101,7 +101,12 @@ def handle_client(client_socket):
                 print("transactions sent")
             elif command == "delete_from_cart":
                product_id = int(args[0])  # Assuming args[0] is the productID
-               print("Deleting item", product_id)
+               quantity=int(args[1])
+               cursor.execute(
+                "UPDATE Products SET stock = stock + ? WHERE productID = ?",
+                (quantity, product_id)
+            )
+               print("Deleting item", product_id, "quantity:",quantity)
                cursor.execute("DELETE FROM Cart WHERE cartID = ?", (product_id,))
                conn.commit()
                client_socket.send("Item deleted from cart".encode())

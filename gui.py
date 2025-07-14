@@ -247,7 +247,7 @@ def delete_items(_):
         product_id=cart_table.item(i)["values"][0]
         quantity=cart_table.item(i)["values"][2]
         cart_table.delete(i)
-        response = send_request(f"delete_from_cart|{product_id}")
+        response = send_request(f"delete_from_cart|{product_id}|{quantity}")
         print("Delete request sent ")
 
 cart_table.bind("<Delete>",delete_items)
