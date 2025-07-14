@@ -26,6 +26,8 @@ def view_products():
 # view_cart function for retrieving cart items from the server 
 def view_cart():
     response = send_request("view_cart")
+    
+    cart_table.delete(*cart_table.get_children())
     for line in response.split("\n"):
         if line.strip():
             cart_id, name, quantity, price, total = line.split("|")
@@ -36,6 +38,7 @@ def add_to_cart():
     product_id = id_var.get()
     quantity = quantity_var.get()
     response = send_request(f"add_to_cart|{product_id}|{quantity}")
+    
     view_cart()
     print(response)
 #    pop up window for insufficient stock 
@@ -200,8 +203,6 @@ def product_selection():
 # binding the product_selection to an event named TreeviewSelection
 products_table.bind("<<TreeviewSelect>>", lambda event:product_selection())
 
-
-products_table.tag_configure("evenrow", background="#891313")
 
 # creating a frame for the cart table 
 add_to_Cart_Frame=ttk.Frame(window)
