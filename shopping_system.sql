@@ -21,9 +21,16 @@
 );
  -- Insert sample data into Products table
  INSERT INTO Products (productName, price, stock) VALUES
- ('Sneakers', 49.99, 10),
- ('Backpack', 29.99, 15),
- ('Water Bottle', 9.99, 20),
- ('Laptop', 799.99, 5),
- ('Smartphone', 599.99, 8),
- ('Headphones', 99.99, 25);
+ ('Office 365', 49.99, 10),
+ ('Windows license', 29.99, 15),
+ ('Digital Marketing Course', 9.99, 20),
+ ('Web-development Course', 799.99, 5),
+ ('Smart VPN', 599.99, 8),
+ ('Node VPN', 99.99, 25),
+ ("Racing game", 30.05, 100),
+ ("Squid Game3", 100, 200),
+ ("SPSS Software", 203.85, 100),
+ ("ChatGPT License", 40.48,200),
+ ("Proton VPN",89.45,300),
+ ("Drake's Album",30.23, 84),
+ ("2024 Raggae Mix",20, 120);

@@ -5,7 +5,8 @@ import  matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 import socket
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg)
-# import the send request function 
+
+
 
 
 
@@ -61,6 +62,7 @@ def checkout():
     popUP.title("Checking Out")
     popUP.geometry("800x700+800+400")
     response = send_request("checkout")
+    sum=0
     # clearing the cart table in the gui 
     for item in cart_table.get_children():
         cart_table.delete(item)
@@ -77,12 +79,16 @@ def checkout():
         checkout_table.heading("first", text="Product Name")
         checkout_table.heading("second", text="Quantity")
         checkout_table.heading("third", text="Total")
+       
         for line in response.split("\n"):
             if line.strip():
                 name, quantity, total = line.split("|")
                 print(f"{name} - Quantity: {quantity}, Total: ${total}")
                 checkout_table.insert(parent="",index=tk.END, values=(name,quantity,total))
+                sum+=float(total)
     # button for closing the pop up window 
+    total_label=ttk.Label(popUP , text=f"Total: MUR{str(sum)}", font=("Arial",18) )
+    total_label.pack()
     close_button=ttk.Button(popUP, text="Close", style="danger" ,command=popUP.destroy )
     close_button.pack(pady=20)
     
@@ -110,6 +116,7 @@ def check_transactions():
     transaction_history.heading("third", text="Quantity")
     transaction_history.heading("fourth", text="Price")
     transaction_history.heading("fifth",text="Total")
+    
     # inserting the values into the table 
     for line in response.split("\n"):
         if line.strip():
@@ -117,6 +124,7 @@ def check_transactions():
             transaction_history.insert(parent="",index=tk.END, values=(product_id,name,quantity,price,total))
             transaction_record["productName"].append(name)
             transaction_record["quantity"].append(float(quantity))
+            
     # inserting the values into the dictionary 
     for item in  set(transaction_record["productName"]):
         count=0
@@ -138,7 +146,7 @@ def check_transactions():
     plot.set_xlabel("Product Names")
     canvas=FigureCanvasTkAgg(fig, master=transaction_history_popUp)
     canvas.draw()
-    canvas.get_tk_widget().pack()
+    canvas.get_tk_widget().pack(fill="both")
     
 
  #  close button to close the transactions history pop up window
@@ -161,9 +169,9 @@ box=ttk.Menu(window)
 window.configure(menu=box)
 file_menu = ttk.Menu(box, tearoff=0)
 box.add_cascade(label="Menu", menu=file_menu)
+
 # adding commands to the menu
-file_menu.add_command(label="View Cart", command=lambda: print("New File"))
-file_menu.add_command(label="Checkout ", command=lambda: print("Open File"))
+file_menu.add_command(label="Checkout ", command=checkout)
 file_menu.add_separator()
 file_menu.add_command(label="Exit", command=window.quit)
 
@@ -235,8 +243,9 @@ quantity_spinbox.grid(row=1, column=2)
 add_to_Cart_Button=ttk.Button(add_to_Cart_Frame, text="Add to Cart", style="success", command=add_to_cart)
 add_to_Cart_Button.grid(column=0, row=1, padx=10)
 
-# delete_button=ttk.Button(add_to_Cart_Frame, text="Delete", style="danger-outline", width=20 )
-# delete_button.grid(row=1 , column=4, padx=40)
+delete_label=ttk.Label(add_to_Cart_Frame, text="Use the delete button to remove an item", style="danger" )
+delete_label.grid(row=2 , column=1, padx=40)
+
 
 # cart_table for displaying cart items 
 cart_table=ttk.Treeview(window, style="secondary",show="headings", columns=("first","second","third","fourth","fifth"))
